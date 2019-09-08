@@ -71,10 +71,7 @@ class PrimitiveArray(IgniteDataType):
 
     @classmethod
     def to_python(cls, ctype_object, *args, **kwargs):
-        result = []
-        for i in range(ctype_object.length):
-            result.append(ctype_object.data[i])
-        return result
+        return bytes(list(ctype_object.data))
 
     @classmethod
     def from_python(cls, value):
@@ -87,11 +84,14 @@ class PrimitiveArray(IgniteDataType):
             )
         length = len(value)
         header.length = length
-        buffer = bytes(header)
+        if isinstance(value, bytes):
+            return value
+        else:
+            buffer = bytes(header)
 
-        for x in value:
-            buffer += cls.primitive_type.from_python(x)
-        return buffer
+            for x in value:
+                buffer += cls.primitive_type.from_python(x)
+            return buffer
 
 
 class ByteArray(PrimitiveArray):
